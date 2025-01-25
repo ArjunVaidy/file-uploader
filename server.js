@@ -8,9 +8,13 @@ server.on("connection", (socket) => {
   socket.on("data", async (data) => {
     if (!fileHandle) {
       socket.pause(); // don't receive the data until fiel is created
-      fileHandle = await fs.open(`storage/test1.pdf`, "w");
+
+      // TCP is ordered and packets are arranged sequentially and hence first packet will have fileName
+      const indexOfDivider = data.indexOf("-------");
+      const fileName = data.subarray(10, indexOfDivider).toString("utf-8");
+      fileHandle = await fs.open(`storage/${fileName}`, "w");
       fileWriteStream = fileHandle.createWriteStream();
-      fileWriteStream.write(data);
+      fileWriteStream.write(data.subarray(indexOfDivider + 7)); // discarding the headers
 
       socket.resume(); // resume receiving the data
       fileWriteStream.on("drain", () => {
