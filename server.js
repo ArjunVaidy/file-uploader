@@ -19,8 +19,10 @@ server.on("connection", (socket) => {
   });
 
   socket.on("end", () => {
-    console.log("Connection ended");
     fileHandle.close();
+    fileHandle = undefined;
+    fileWriteStream = undefined;
+    console.log("Connection ended");
   });
 });
 
