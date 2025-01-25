@@ -2,14 +2,17 @@ const net = require("net");
 const fs = require("fs/promises");
 
 const server = net.createServer(() => {});
-
+let fileHandle, fileWriteStream;
 server.on("connection", (socket) => {
   console.log("New Connection");
-  let fileHandle, fileWriteStream;
   socket.on("data", async (data) => {
-    fileHandle = await fs.open(`storage/test.txt`, "w");
-    fileWriteStream = fileHandle.createWriteStream();
-    fileWriteStream.write(data);
+    if (!fileHandle) {
+      fileHandle = await fs.open(`storage/test.txt`, "w");
+      fileWriteStream = fileHandle.createWriteStream();
+      fileWriteStream.write(data);
+    } else {
+      fileWriteStream.write(data);
+    }
   });
 
   socket.on("end", () => {
