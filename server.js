@@ -8,12 +8,18 @@ server.on("connection", (socket) => {
   socket.on("data", async (data) => {
     if (!fileHandle) {
       socket.pause(); // don't receive the data until fiel is created
-      fileHandle = await fs.open(`storage/test.txt`, "w");
+      fileHandle = await fs.open(`storage/test1.pdf`, "w");
       fileWriteStream = fileHandle.createWriteStream();
       fileWriteStream.write(data);
 
       socket.resume(); // resume receiving the data
+      fileWriteStream.on("drain", () => {
+        socket.resume();
+      });
     } else {
+      if (!fileWriteStream.write(data)) {
+        socket.pause();
+      }
       fileWriteStream.write(data);
     }
   });

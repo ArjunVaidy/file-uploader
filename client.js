@@ -7,13 +7,21 @@ const socket = net.createConnection(
     port: 5050,
   },
   async () => {
-    const filePath = "./text.txt";
+    const filePath = "./ARJUN+JAYASRI REC.pdf";
     const fileHandle = await fs.open(filePath, "r");
     const fileReadStream = fileHandle.createReadStream();
 
     // Reading from the source file
     fileReadStream.on("data", (data) => {
+      // in client socket is writable stream(sends data) so it will have back pressure
+      if (!socket.write(data)) {
+        fileReadStream.pause(); // pass the source read
+      }
       socket.write(data);
+    });
+
+    socket.on("drain", () => {
+      fileReadStream.resume(); // resume the source read
     });
 
     fileReadStream.on("end", () => {
