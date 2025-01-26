@@ -2,8 +2,8 @@ const net = require("net");
 const fs = require("fs/promises");
 
 const server = net.createServer(() => {});
-let fileHandle, fileWriteStream;
 server.on("connection", (socket) => {
+  let fileHandle, fileWriteStream;
   console.log("New Connection");
   socket.on("data", async (data) => {
     if (!fileHandle) {
