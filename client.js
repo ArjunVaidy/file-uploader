@@ -12,6 +12,8 @@ const socket = net.createConnection(
     const fileHandle = await fs.open(filePath, "r");
     const fileReadStream = fileHandle.createReadStream();
     socket.write(`fileName: ${fileName}-------`); // we are implementing our own header like fileName and dashes
+    const fileSize = (await fileHandle.stat()).size;
+    let bytesUploaded = 0;
     // Reading from the source file
     fileReadStream.on("data", (data) => {
       // in client socket is writable stream(sends data) so it will have back pressure
@@ -19,6 +21,11 @@ const socket = net.createConnection(
         fileReadStream.pause(); // pass the source read
       }
       socket.write(data);
+      bytesUploaded += data.length; // after every write calculate the send over data and add it to byts uploaded
+      let newUploadedBytesInPercentage = Math.floor(
+        (bytesUploaded / fileSize) * 100
+      );
+      console.log(`${newUploadedBytesInPercentage}%`);
     });
 
     socket.on("drain", () => {
